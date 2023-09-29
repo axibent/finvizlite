@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
+from io import StringIO
 
 def rows_to_pages(rows):
     """ round up to the nearest 20, then divide by 20 
@@ -60,8 +61,9 @@ def scrape(url, return_df_only=True, print_urls=False):
     page_options = page_select[0].find_all("option")
     urls = get_pagination_urls(url, page_options)
 
-    tables = soup.select("#screener-content table")
-    df = get_df(tables)
+    table_class_name = 'styled-table-new is-rounded is-tabular-nums w-full screener_table'
+    table = soup.find("table", {"class": table_class_name})
+    df = pd.read_html(StringIO(str(table)))[0]
     if return_df_only:
         return df
     else:
